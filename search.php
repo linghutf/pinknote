@@ -145,7 +145,7 @@ if(isset($_POST['modify'])) //"修改"
         <tr><td>上映日:</td><td><input type="date" name="pressDate" value="$dt_pressDate"/></td></tr>
 HTML;
 
-        if (!empty($dt_finishDate)) {
+        if (isset($dt_finishDate)) {
             echo '<tr><td>完成日:</td><td><input type="date" name="finishDate" value="' .$dt_finishDate. '"/></td></tr>';
         }
 
