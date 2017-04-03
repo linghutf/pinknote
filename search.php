@@ -1,69 +1,5 @@
-<html>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-        <scripy src="http://lib.sinaapp.com/js/jquery/3.1.0/jquery-3.1.0.min.js"></scripy>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <link href="css/bootstrap.min.css" rel="stylesheet">
-        <link href="css/fixed-layout.css" rel="stylesheet">
-        <script src="js/bootstrap.min.js"></script>
-    </head>
-<body>
-<div class="navbar navbar-fixed-top"> 
-    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
-    <div class="container-fluid">
-    <div>
-        <ul class="nav navbar-nav">
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    观影<b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="add_mov.php">添加</a></li> 
-                    <li><a href="list_mov_todo.php">提醒</a></li> 
-                    <li class="divider"></li>
-                    <li><a href="search_mov.php">修改</a></li> 
-                    <li><a href="list_mov_his.php?page_id=0">历史</a></li> 
-                </ul>
-            </li>
-            
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    娱乐<b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="add_movie.php">添加</a></li> 
-                    <li><a href="list_todo.php">任务</a></li>
-                    <li class="divider"></li>
-                    <li><a href="search.php">修改</a></li> 
-                    <li><a href="list_history.php?page_id=0">历史</a></li>
-                    <li class="divider"></li>
-                    <li><a href="libav.php">主题</a></li>
-                    <li><a href="libact.php">艺人</a></li>
-                </ul>
-            </li>
-            
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    文件共享<b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="up_file.php">上传</a></li> 
-                    <li><a href="download_file.php">下载</a></li>
-                    <li class="divider"></li>
-                    <li><a href="list_file.php">浏览</a></li> 
-                    
-                </ul>
-            </li>
-            
-        </ul>
-    </div>
-    </div>
-</nav>
-</div>
-
-<div class="container"> 
-  <div class="leaderboard"> 
+<?php include_once('header.php');?>
+ <div class="leaderboard">
 
     <form class="form-horizontal" role="form" action="<?php print $_SERVER['PHP_SELF']?>" method="post">
   <div class="form-group">
@@ -72,14 +8,14 @@
       <input type="text" class="form-control" id="topic" name="topic" placeholder="请输片名" />
     </div>
   </div>
-  
+
   <div class="form-group">
     <label for="actor" class="col-sm-2 control-label">艺人</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="actor" name="actor" placeholder="请输入艺人" />
     </div>
   </div>
-  
+
   <div class="form-group">
     <label for="pressDate" class="col-sm-2 control-label">上映</label>
     <div class="col-sm-10">
@@ -87,7 +23,7 @@
       <input type="date" class="form-control" id="pressDate_end" name="pressDate_end"/>
     </div>
   </div>
-  
+
   <div class="form-group">
     <label for="pressDate" class="col-sm-2 control-label">观看</label>
     <div class="col-sm-10">
@@ -97,7 +33,7 @@
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <input type="submit" class="btn btn-info" name="search" value="搜索" />
+      <input type="submit" class="btn btn-info form-control" name="search" value="搜索" />
     </div>
   </div>
 </form>
@@ -114,7 +50,7 @@
 require_once('connect.php');
 require_once('utils.php');
 
-if(!empty($_POST['search']))
+if(isset($_POST['search']))
 {
     //button无法收到post
     # 查询符合条件的主题
@@ -149,7 +85,7 @@ if(!empty($_POST['search']))
         $sql.=' AND finishDate > '.$finishDate_start.' AND finishDate <='.$finishDate_end;
     }
     $sql.=' order by pressDate desc;';
-    
+
     $res = $db->query($sql);
     $first=true;
     while($row=$res->fetchArray(SQLITE3_ASSOC))
@@ -157,7 +93,7 @@ if(!empty($_POST['search']))
         if($first){
             //查询结果
             echo '<div class="row">';
-            
+
             echo '<form action="'.$_SERVER['PHP_SELF'].'" method="post">';
             echo '<table class="table table-striped table-condensed">';
             echo '<tr>
@@ -180,15 +116,15 @@ if(!empty($_POST['search']))
     }
     if(!$first){
        echo '</table>
-            <input type="submit" name ="modify" class="btn btn-success" value="修改"/><br/>
+            <input type="submit" name ="modify" class="btn btn-success form-control" value="修改"/><br/>
         </form>
         </div>';
     }
 }
 // 添加修改对话,radio决定只能修改一个
-if(!empty($_POST['modify'])) //"修改"
+if(isset($_POST['modify'])) //"修改"
 {
-    
+
     $sql = 'SELECT topic,actor,pressDate,finishDate,rank from movie where topic="'.$_POST['ismodify'].'";';
     $res=$db->query($sql);
     if($row=$res->fetchArray(SQLITE3_ASSOC))
@@ -212,14 +148,14 @@ HTML;
         if (!empty($dt_finishDate)) {
             echo '<tr><td>完成日:</td><td><input type="date" name="finishDate" value="' .$dt_finishDate. '"/></td></tr>';
         }
-       
+
         echo '</table><input type="submit" name ="update" class="btn btn-success" value="更新"/><br/>';
         echo '</form></div>';
         setcookie('old_topic',$topic);//设置cookie在页面间传递
     }
 }
 // 修改数据
-if(!empty($_POST['update']))
+if(isset($_POST['update']))
 {
     $old_topic=$_COOKIE['old_topic'];
     $sql = "";
@@ -228,7 +164,7 @@ if(!empty($_POST['update']))
     }else{
         $sql = 'UPDATE movie SET topic=:topic,actor=:actor,pressDate=:pressDate,finishDate=:finishDate,rank=:rank WHERE topic="'.$old_topic.'";';
     }
-    
+
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':topic',$_POST['topic'],SQLITE3_TEXT);
     $stmt->bindValue(':actor',$_POST['actor'],SQLITE3_TEXT);
@@ -247,7 +183,6 @@ if(!empty($_POST['update']))
 }
 
 $db->close();
+
 ?>
-</div>
-</body>
-</html>
+<?php include_once('footer.php');?>
