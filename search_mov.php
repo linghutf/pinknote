@@ -5,11 +5,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <script src="js/bootstrap.min.js"></script>
-        <script type="text/javascript">
-        $(function(){
-            // TODO 改成Ajax模式
-        });
-        </script>
+        <title>更新</title>
     </head>
 <body>
     <div class="navbar navbar-fixed-top"> 
@@ -64,20 +60,48 @@
     </div>
 </nav>
 </div>
+<div class="container"> 
 
-    <div class="container">
-    <div class="leaderboard">
-    <form action="<?php print $_SERVER['PHP_SELF']?>" method="post">
-        <table class="table table-striped table-condensed">
-            <tr><td>中文名:</td><td><input type="text" name="chn_name" /></td></tr>
-            <tr><td>英文名:</td><td><input type="text" name="eng_name" /></td></tr>
-            <tr><td>上映区间:</td><td><input type="date" name="pressDate_start"/></td><td><input type="date" name="pressDate_end"/></td></tr>
-            <tr><td>完成区间:</td><td><input type="date" name="finishDate_start"/></td><td><input type="date" name="finishDate_end"/></td></tr>
-        </table>
-        <input type="submit" class="submit" name ="search_mov" value="搜索"/><br/>
-    </form>
-    </table>
+  <div class="leaderboard"> 
+
+    <form class="form-horizontal" role="form" action="<?php print $_SERVER['PHP_SELF']?>" method="post">
+  <div class="form-group">
+    <label for="topic" class="col-sm-2 control-label">中文名</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="topic" name="chn_name" placeholder="请输入片名" />
     </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="actor" class="col-sm-2 control-label">英文名</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="actor" name="eng_name" />
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="pressDate" class="col-sm-2 control-label">上映</label>
+    <div class="col-sm-10">
+      <input type="date" class="form-control" id="pressDate_start" name="pressDate_start" />
+      <input type="date" class="form-control" id="pressDate_end" name="pressDate_end"/>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="pressDate" class="col-sm-2 control-label">观看</label>
+    <div class="col-sm-10">
+      <input type="date" class="form-control" id="finishDate_start" name="finishDate_start" />
+      <input type="date" class="form-control" id="finishDate_end" name="finishDate_end"/>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <input type="submit" class="btn btn-default" name="search_mov" value="搜索" />
+    </div>
+  </div>
+</form>
+</div>
+   
 <?php
 /**
  * Created by PhpStorm.

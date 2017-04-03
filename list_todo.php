@@ -67,10 +67,11 @@
     <table class="table table-striped table-condensed">
         <thead>
        <tr>
+           <th>完成</th>
            <th>片名</th>
            <th>主演</th>
            <th>上映日</th>
-           <th>完成</th>
+           
        </tr>
        </thead>
        <tbody>
@@ -83,8 +84,8 @@ $ret = $db->query($sql);
 while($row = $ret->fetchArray(SQLITE3_ASSOC)){
     $pressDate = $row["pressDate"];
     $pressDate = date('Y-m-d',$pressDate);
-    echo '<tr><td>'.$row['topic'].'</td><td>'.
-    $row['actor'].'</td><td>'.$pressDate.'</td><td><input type="checkbox" name="finish_flag[]" value="'.$row['topic'].'"></td></tr>';
+    echo '<tr><td><input type="checkbox" name="finish_flag[]" value="'.$row['topic'].'" /></td><td>'.$row['topic'].'</td><td>'.
+    $row['actor'].'</td><td>'.$pressDate.'</td></tr>';
 }
 
 // 标记完成的电影
@@ -111,7 +112,7 @@ $db->close();
 ?>
 </tbody>
 </table>
-<input type="submit" value="完成"/>
+<input type="submit" class="btn btn-success" value="完成"/>
     </form>
      </div>
 </div>

@@ -7,12 +7,6 @@
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/fixed-layout.css" rel="stylesheet">
         <script src="js/bootstrap.min.js"></script>
-        <script type="text/javascript">
-    $(function(){
-        // TODO 
-        
-    });
-        </script>
     </head>
 <body>
 <div class="navbar navbar-fixed-top"> 
@@ -82,7 +76,7 @@
   <div class="form-group">
     <label for="actor" class="col-sm-2 control-label">艺人</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="actor" name="actor" placeholder="请输入姓" />
+      <input type="text" class="form-control" id="actor" name="actor" placeholder="请输入艺人" />
     </div>
   </div>
   
@@ -103,7 +97,7 @@
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <input type="submit" class="btn btn-default" name="search" value="搜索" />
+      <input type="submit" class="btn btn-info" name="search" value="搜索" />
     </div>
   </div>
 </form>
@@ -186,7 +180,7 @@ if(!empty($_POST['search']))
     }
     if(!$first){
        echo '</table>
-            <input type="submit" name ="modify" value="修改"/><br/>
+            <input type="submit" name ="modify" class="btn btn-success" value="修改"/><br/>
         </form>
         </div>';
     }
@@ -219,7 +213,7 @@ HTML;
             echo '<tr><td>完成日:</td><td><input type="date" name="finishDate" value="' .$dt_finishDate. '"/></td></tr>';
         }
        
-        echo '</table><input type="submit" name ="update" value="更新"/><br/>';
+        echo '</table><input type="submit" name ="update" class="btn btn-success" value="更新"/><br/>';
         echo '</form></div>';
         setcookie('old_topic',$topic);//设置cookie在页面间传递
     }
@@ -229,7 +223,7 @@ if(!empty($_POST['update']))
 {
     $old_topic=$_COOKIE['old_topic'];
     $sql = "";
-    if (empty($_POST['finishDate'])) {
+    if (!isset($_POST['finishDate'])) {
         $sql = 'UPDATE movie SET topic=:topic,actor=:actor,pressDate=:pressDate,rank=:rank WHERE topic="'.$old_topic.'";';
     }else{
         $sql = 'UPDATE movie SET topic=:topic,actor=:actor,pressDate=:pressDate,finishDate=:finishDate,rank=:rank WHERE topic="'.$old_topic.'";';
@@ -241,7 +235,7 @@ if(!empty($_POST['update']))
     $pressDate = dt_to_unix($_POST['pressDate']);
     $stmt->bindValue(':pressDate',$pressDate,SQLITE3_INTEGER);
     $stmt->bindValue(':rank',$_POST['rank'],SQLITE3_INTEGER);
-    if (!empty($_POST['finishDate'])) {
+    if (isset($_POST['finishDate'])) {
         $finishDate = dt_to_unix($_POST['finishDate']);
         $stmt->bindValue(':finishDate',$finishDate,SQLITE3_INTEGER);
     }

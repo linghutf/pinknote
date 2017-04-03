@@ -70,7 +70,7 @@
   <div class="form-group">
     <label for="lastname" class="col-sm-2 control-label">英文名</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="lastname" name="eng_name" placeholder="请输入姓" />
+      <input type="text" class="form-control" id="lastname" name="eng_name" placeholder="请输入英文名" />
     </div>
   </div>
   
