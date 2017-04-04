@@ -5,9 +5,9 @@
 
 include_once('header.php');
 
-setcookie('firstday',strtotime(date('Y-m-01')));
+setcookie('firstday',strtotime(date('Y-m-01')),time()+31536000,'/');
 $first=date('Y-m-01');
-setcookie('lastday',strtotime(date('Y-m-d',strtotime("$first +1 month -1 day"))));
+setcookie('lastday',strtotime(date('Y-m-d',strtotime("$first +1 month -1 day"))),time()+31536000,'/');
 //echo '<p>'.$_COOKIE['firstday'].',  '.$_COOKIE['lastday'].'</p>';
 
 // TODO 艺人热度计算式:d=每部影片评分*总片数百分比

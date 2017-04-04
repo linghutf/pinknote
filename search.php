@@ -64,7 +64,9 @@ if(isset($_POST['search']))
     // 判断区间是否合法
     if($pressDate_start>$pressDate_end || $finishDate_start>$finishDate_end)
     {
-        echo '<script>alert(\'日期不合法\');/*location.href=\'".$_SERVER["HTTP_REFERER"]."\';*/</script>';
+        echo <<< EOF
+        <script type="text/javascript">alert('日期不合法');</script>
+EOF;
         exit;
     }
 
@@ -145,13 +147,14 @@ if(isset($_POST['modify'])) //"修改"
         <tr><td>上映日:</td><td><input type="date" name="pressDate" value="$dt_pressDate"/></td></tr>
 HTML;
 
-        if (isset($dt_finishDate)) {
+        if (!empty($dt_finishDate[0])) {
             echo '<tr><td>完成日:</td><td><input type="date" name="finishDate" value="' .$dt_finishDate. '"/></td></tr>';
         }
 
         echo '</table><input type="submit" name ="update" class="btn btn-success" value="更新"/><br/>';
         echo '</form></div>';
-        setcookie('old_topic',$topic);//设置cookie在页面间传递
+        setcookie('old_topic',time()-3000);
+        setcookie('old_topic',$topic,time()+31536000,'/');//设置cookie在页面间传递
     }
 }
 // 修改数据
