@@ -15,7 +15,7 @@
   <div class="form-group">
     <label for="actor" class="col-sm-2 control-label">艺人</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="actor" name="actor" placeholder="请输入姓" />
+      <input type="text" class="form-control" id="actor" name="actor" placeholder="请输入艺人" />
     </div>
   </div>
 

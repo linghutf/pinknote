@@ -45,7 +45,7 @@ if(isset($_POST['mark']))
         <table>
             <tr><td>艺人:</td><td><input type="text" name="m_name" value="$name" required="true"/></td>
             <td>热度:</td><td><input type="number" name="m_rank" min="1" max="5" value="$rank" /></td></tr>
-            <tr><td colspan="2"><input type="submit" name="update" value="更新" /></td></tr></table></form>
+            <tr><td colspan="2"><input type="submit" class="btn btn-primary" name="update" value="更新" /></td></tr></table></form>
 HTML;
     }
 }

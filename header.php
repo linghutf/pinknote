@@ -1,17 +1,20 @@
-<?php
-echo <<< HTML
 <html>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <head>
-        <scripy src="http://lib.sinaapp.com/js/jquery/3.1.0/jquery-3.1.0.min.js"></scripy>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="js/jquery.min.js" type="text/javascript"></script>
         <link href="css/bootstrap.min.css" rel="stylesheet">
-        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap.min.js" type="text/javascript"></script>
         <title>电影热点记录</title>
+        <style>
+        body{
+            padding-top:70px;
+        }
+        </style>
     </head>
 <body>
-<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
-    <div class="container-fluid">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
     <div>
         <ul class="nav navbar-nav">
             <li class="dropdown">
@@ -60,5 +63,3 @@ echo <<< HTML
     </div>
 </nav>
 <div class="container">
-HTML;
-?>
