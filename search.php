@@ -217,7 +217,7 @@ $db->close();
                
                var p2 = $('<div class="form-group"><label for="actor" class="form-control">艺人:</label><input type="text" name="actor" /></div>');
                $(p2.find('input')).val(actor);
-               var p3 = $('<div class="form-group"><label for="topic" class="form-control">评分</label><input type="number" name="rank" min="1" max="5" /></div>');
+               var p3 = $('<div class="form-group"><label for="rank" class="form-control">评分:</label><input type="number" name="rank" min="1" max="5" /></div>');
                $(p3.find('input')).val(rank);
                var p4 = $('<div class="form-group"><label for="pressDate" class="form-control">上映:</label><input type="date" name="pressDate" /></div>');
                $(p4.find('input')).val(pressDate);
