@@ -159,7 +159,7 @@
        function updateHandler()
        {
            // 获取当前影评
-           var comment = $.trim($('textarea#create_comment').text());
+           var comment = $('td:eq(0) input#old_comment').text();
            // 获取当前行的信息
            var curRow = $(this).parent().parent();
            var chn_name = $(curRow.find('td:eq(0) a')).text();
@@ -173,7 +173,6 @@
            var newRow = createNewEditRow(oldData);
            // 保存旧消息
            newRow.append($('<td></td>').append($('<input type="hidden" id="old_chn_name"/>').val(chn_name)));
-           
            
            // 更新事件绑定
            // 更新操作，相比保存操作多了一步检查
@@ -217,6 +216,8 @@
                        var newRow = createRowDOM(cloneData);
                        curEditRow.replaceWith(newRow);
                        //cpanel.text(texta.val());
+                       // 变回p模式
+                       $('textarea#create_comment').replaceWith($('<p id="comment"></p>').text($.trim($('textarea#create_comment').val())));
                    });
                }else{
                    // 回退状态
@@ -233,15 +234,18 @@
                $(curRow.find('a#update')).click(updateHandler);
                // 切换回p状态
                
+               //$('h3#title').html('<strong>'+(data['chn_name']===undefined?oldData['chn_name']:data['chn_name'])+'</strong>的影评');
+               var cpanel = $('<p id="comment"></p>');
+               var texta = $('textarea#create_comment');
+               texta.replaceWith(cpanel);
            });
               
            // 改成编辑状态
            curRow.replaceWith(newRow);
-           // 变回p模式
-           //$('h3#title').html('<strong>'+(data['chn_name']===undefined?oldData['chn_name']:data['chn_name'])+'</strong>的影评');
-           var cpanel = $('<p id="comment" class="panel-title"></p>');
-           var texta = $('textarea#create_comment');
-           texta.replaceWith(cpanel);
+           // 改成textarea模式
+           var texta = $('<textarea id="create_comment" class="form-control" rows="5"></textarea>');
+           $('p#comment').replaceWith(texta);
+           
        }
        
        // 点击添加按钮

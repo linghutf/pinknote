@@ -94,4 +94,44 @@ function array_remove($data, $key){
     return $data;
 
 }
+
+// UTF-8 字符串转成数组
+function mbstr_to_arr($tempaddtext)
+{
+    $cind = 0;
+    $arr_cont = array();
+    for ($i = 0; $i < strlen($tempaddtext); $i++) {
+            if (strlen(substr($tempaddtext, $cind, 1)) > 0) {
+                if (ord(substr($tempaddtext, $cind, 1)) < 192) { //如果为英文则取1个字节
+                    if (substr($tempaddtext, $cind, 1) != " ") {
+                        array_push($arr_cont, substr($tempaddtext, $cind, 1));
+                    }
+                    $cind++;
+                } elseif(ord(substr($tempaddtext, $cind, 1)) < 224) {
+                    array_push($arr_cont, substr($tempaddtext, $cind, 2));
+                    $cind+=2;
+                } else {
+                    array_push($arr_cont, substr($tempaddtext, $cind, 3));
+                    $cind+=3;
+                }
+            }
+        }
+    return $arr_cont;
+}
+// 在文中字符串',"上加上转义\
+function replace_quote($str)
+{
+    $arr = mbstr_to_arr($str);
+    $result = '';
+    for($i=0;i<count($arr);++$i){
+        if($arr[$i]=='\''){//转义，一个字符
+            $result.="\'";//不会转义，两个字符
+        }else if($arr[$i]=="\""){//转义
+            $result.= '\"';//不转义
+        }else{
+            $result.=$arr[$i];
+        }
+    }
+    return $result;
+}
 ?>

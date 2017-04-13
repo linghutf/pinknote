@@ -1,5 +1,5 @@
 <?php
-header('Content-type: text/json');
+header('Content-type: text/json;charset=utf-8');
 
 require_once('connect.php');
 require_once('utils.php');
@@ -280,6 +280,11 @@ function finishMvTodo($db)
 function updateMv($db)
 {
     $old_chn_name = $_POST['old_chn_name'];
+    $comment = $_POST['comment'];
+    // 转义单引号，双引号
+    $old_chn_name = replace_quote($old_chn_name);
+    $comment = replace_quote($comment);
+    
     $sql = "UPDATE libmov SET ";
     if(isset($_POST['chn_name']))
     {
