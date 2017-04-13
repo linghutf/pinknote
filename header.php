@@ -46,8 +46,9 @@
                     <li class="divider"></li>
                     <li><a href="avhist.php">历史</a></li>
                     <li class="divider"></li>
-                    <li><a href="libav.php">主题</a></li>
-                    <li><a href="libact.php">艺人</a></li>
+                    <li><a href="series.php">主题</a></li>
+                    <li class="divider"></li>
+                    <li><a href="actress.php">艺人</a></li>
                 </ul>
             </li>
 

@@ -52,6 +52,15 @@
     $(document).ready(function(){
         // 添加 
        var g_tab = $("table#data");
+        /**
+         * 影评功能 p模式和textarea模式
+         * 1. 添加时 P->T,内容清空,标题改成新建
+         *    11. 确认时，上传T中内容，T->P,内容不变 ，标题改成对应新加片名
+         *    12. 取消时，T->P，丢弃内容，标题改变我的影评
+         * 2. 修改时，P->T，内容保留,标题保留
+         *    21. 确认时，比对T与隐藏字段input的内容，不同就上传，标题更新,T->P
+         *    22. 取消时，T->P,内容重新获取input，标题复原
+         */
        // 仅在文档载入时执行了一次
        // 获取总条数和每页显示条数
        $.get('api.php?action=getMvPageNum',{isTodo:0},function(res){
@@ -195,13 +204,7 @@
                        
                    }
                }
-               
-               // 变回p模式
-               //$('h3#title').html('<strong>'+(data['chn_name']===undefined?oldData['chn_name']:data['chn_name'])+'</strong>的影评');
-               //var cpanel = $('<p id="comment" class="panel-title"></p>');
-               //var texta = $('textarea#create_comment');
-               //texta.replaceWith(cpanel);
-               // 没有考虑没有艺人的情况
+
                if(!isNotModify(data)){
                    // 发送数据
                    $.post("api.php?action=updateMv",data,function(res){
@@ -234,10 +237,12 @@
                $(curRow.find('a#update')).click(updateHandler);
                // 切换回p状态
                
-               //$('h3#title').html('<strong>'+(data['chn_name']===undefined?oldData['chn_name']:data['chn_name'])+'</strong>的影评');
+               $('h3#title').html('<strong>'+oldData['chn_name']+'</strong>的影评');
                var cpanel = $('<p id="comment"></p>');
                var texta = $('textarea#create_comment');
                texta.replaceWith(cpanel);
+               // 重建内容
+               cpanel.text(oldData['comment']);
            });
               
            // 改成编辑状态
@@ -338,73 +343,5 @@
        });
     });
 </script>
-<!--?php
-// TODO 改成分页模式
-require_once('connect.php');
 
-if($row=$db->query('SELECT COUNT(chn_name) as tot FROM libmov where finishDate!=0;')->fetchArray(SQLITE3_ASSOC))
-{
-    $tot = $row['tot'];
-}
-$item_num = 10;
-$page_num = ceil($tot/$item_num);
-$page_id=$_GET['page_id'];
-
-$page_start = $page_id*$item_num;
-
-$sql= 'SELECT chn_name,eng_name,pressDate,finishDate FROM libmov where finishDate!=0 ORDER BY finishDate desc limit '.$page_id.','.$item_num.';';
-
-$ret = $db->query($sql);
-$num = 0;
-while($row = $ret->fetchArray(SQLITE3_ASSOC)){
-    $pressDate = $row["pressDate"];
-    $pressDate = date('Y-m-d',$pressDate);
-    $finishDate = $row['finishDate'];
-    $finishDate = date('Y-m-d',$finishDate);
-    $chn_name = $row['chn_name'];
-    $eng_name = $row['eng_name'];
-    $num++;
-    echo '<tr><td>'.$chn_name.'</td><td>'.
-    $eng_name.'</td><td>'.$pressDate.'</td><td>'.$finishDate.'</td></tr>';
-}
-$db->close();
-echo '<tr><td>总计:</td><td colspan="3">'.$num.'</td></tr>';
-
-
-// 页码显示
-$page_prev=$page_id-1;
-if($page_prev<0) $page_prev=0;
-echo <<< EOF
-<ul class="pagination">
-    <li><a href="{$_SERVER['PHP_SELF']}?page_id=$page_prev">&laquo;</a></li>
-EOF;
-
-if($page_num>1)
-{
-    for($i=0;$i<$page_num;++$i)
-    {
-        $j=$i+1;
-        if($i==$page_id){
-            echo <<< HTML
-    <li class="active"><a href="{$_SERVER['PHP_SELF']}?page_id=$i">$j</a></li>
-HTML;
-        }else{
-            echo <<< HTML
-    <li><a href="{$_SERVER['PHP_SELF']}?page_id=$i">$j</a></li>
-HTML;
-        }
-    }
-}
-
-$page_next=$page_id+1;
-if($page_next>=$page_num) $page_next=$page_num-1;
-echo <<< EOF
- <li><a href="{$_SERVER['PHP_SELF']}?page_id=$page_next">&raquo;</a></li>
-</ul>
-EOF;
-
-?>
-</tbody></table>
-</div>
-</div-->
 <?php include_once('footer.php');?>

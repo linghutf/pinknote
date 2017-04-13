@@ -119,15 +119,17 @@ function mbstr_to_arr($tempaddtext)
     return $arr_cont;
 }
 // 在文中字符串',"上加上转义\
+// 由于字符串是由双引号括起来的，只针对双引号转义 --- 不起作用
+// 双引号全部换成单引号
 function replace_quote($str)
 {
     $arr = mbstr_to_arr($str);
     $result = '';
-    for($i=0;i<count($arr);++$i){
-        if($arr[$i]=='\''){//转义，一个字符
+    for($i=0;$i<count($arr);++$i){
+        /*if($arr[$i]=='\''){//转义，一个字符
             $result.="\'";//不会转义，两个字符
-        }else if($arr[$i]=="\""){//转义
-            $result.= '\"';//不转义
+        }else*/ if($arr[$i]=="\""){//转义
+            $result.= '\'';//不转义
         }else{
             $result.=$arr[$i];
         }

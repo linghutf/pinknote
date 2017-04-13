@@ -28,7 +28,19 @@ switch($type)
     case "listMvHistory":echo listMv($db,$isTodo=false);break;
     
     // 展示影片详情,更新影评
-    case "listMvDetail":echo listMvDetail($db);break;
+    //case "listMvDetail":echo listMvDetail($db);break;
+
+    // 如果查阅日期小于当月第一天，就推送该主题，否则不推送
+    // 左下角显示最热门的n个话题 TODO:引入统计图
+    // 主题分计算公式 = (aver(A主题对应每部评分)*A出现次数/总现有次数)*5
+    // date --- aver_rank 组成一条记录，最后画成折线图，就可以知道该话题的趋势
+    case "getAvSerieNum":echo getSerieNum($db);break;
+    case "addAvSerie":echo addAvSerie($db);break;
+    case "listAvSerieTodo":echo listAvSerie($db,$isTodo=true);break;
+    case "listAvSerieHist":echo listAvSerie($db,$isTodo=false);break;
+    case "updateAvSerie":echo updateAvSerie($db);break;
+    case "finishAvSerieTodo":echo finishAvSerieTodo($db);break;
+    case "deleteAvSerie":echo deleteAvSerie($db);break;
 }
 // 结束
 $db->close();
@@ -193,18 +205,117 @@ function listActress()
     
 }
 
-function addSerie()
+function addAvSerie($db)
 {
-    
+    $today = strtotime(date('Y-m-d'));
+    $res = ['status'=>'ok'];
+    $sql = "insert into libs(topic,curDate,degree) values(:topic,:curDate,:degree)";
+
+    $stmt = $db->prepare($sql);
+
+    $stmt->bindValue(':topic',$_POST['topic'],SQLITE3_TEXT);
+    $stmt->bindValue(":degree",0.0,SQLITE3_INTEGER);//默认为0
+    $stmt->bindValue(':curDate',$today,SQLITE3_INTEGER);
+
+    $ret=$stmt->execute();
+
+    if(!$ret){
+        $res['status']=$db->lastErrorMsg();
+    }
+    return json_encode($res);
 }
 
-function updateSerie()
+// 获取未完成的系列
+function getSerieNum($db)
 {
-    
+    $itemNum = 16; // 每页展示条数
+    $sql = '';
+    // 默认是显示todo
+    // 否则是显示全部
+    if($_GET['isTodo']==1)//参数是字符串，需要转换
+    {
+        // 上次浏览日期小于当月1日
+        $firstday = strtotime(date('Y-m-01'));
+        $sql="SELECT COUNT(*) as ct FROM libs WHERE curDate <$firstday";
+
+    }else{
+        $sql.= 'SELECT COUNT(*) as ct FROM libs';
+    }
+    $ret = $db->query($sql);
+    $total = 0;
+    if($row=$ret->fetchArray(SQLITE3_ASSOC))
+    {
+        $total = $row['ct'];
+    }
+
+    $res=['status'=>'ok'];
+    $res['total'] = $total;
+    $res['itemNum'] = $itemNum;
+    return json_encode($res);
 }
-function listSerie()
+
+function updateAvSerie($db)
 {
-    
+    $topic = $_POST['topic'];
+    $old_topic = $_POST['old_topic'];
+    $sql = "UPDATE libs SET topic=\"$topic\" WHERE topic=\"$old_topic\"";
+
+    $ret = $db->exec($sql);
+    $res['status'] = 'ok';
+    if(!$ret){
+        $res['status'] = $db->lastErrorMsg();
+    }
+    return json_encode($res);
+}
+
+function finishAvSerieTodo($db)
+{
+    $topic = $_POST['topic'];
+    $today = strtotime(date('Y-m-d'));
+    $sql = "UPDATE libs SET curDate=$today WHERE topic=\"$topic\"";
+
+    $ret = $db->exec($sql);
+    $res['status'] = 'ok';
+    if(!$ret){
+        $res['status'] = $db->lastErrorMsg();
+    }
+    return json_encode($res);
+}
+
+function listAvSerie($db,$isTodo)
+{
+    $offset = $_POST['offset'];//起始页
+    $num = $_POST['num'];//条数
+    $sql = '';
+    if($isTodo){
+        $firstday = strtotime(date('Y-m-01'));
+        $sql="SELECT topic FROM libs where curDate<$firstday ORDER BY degree desc limit $offset,$num";
+    }
+    else{
+        $sql="SELECT topic FROM libs ORDER BY degree desc limit $offset,$num";
+    }
+    $ret = $db->query($sql);
+    $arr = ["status"=>"ok"];
+    $arr['data'] = [];
+    while($row = $ret->fetchArray(SQLITE3_ASSOC)){
+        array_push($arr['data'],$row);
+    }
+    if(count($arr['data'])==0) $arr['status']='todos empty!';
+    return json_encode($arr);
+}
+
+function deleteAvSerie($db)
+{
+    $topic = $_POST['topic'];
+
+    $sql = "DELETE FROM libs WHERE topic=\"$topic\"";
+
+    $ret = $db->exec($sql);
+    $res['status'] = 'ok';
+    if(!$ret){
+        $res['status'] = $db->lastErrorMsg();
+    }
+    return json_encode($res);
 }
 /**
  *  电影类操作
@@ -279,16 +390,16 @@ function finishMvTodo($db)
 
 function updateMv($db)
 {
-    $old_chn_name = $_POST['old_chn_name'];
-    $comment = $_POST['comment'];
-    // 转义单引号，双引号
-    $old_chn_name = replace_quote($old_chn_name);
-    $comment = replace_quote($comment);
-    
+    $old_chn_name = replace_quote($_POST['old_chn_name']);
+
     $sql = "UPDATE libmov SET ";
+    // 解决名称有引号问题
     if(isset($_POST['chn_name']))
     {
-        $sql.='chn_name="'.$_POST['chn_name'].'",';
+        $chn_name = replace_quote($_POST['chn_name']);
+        $sql.= <<< HTML
+        chn_name = "$chn_name",
+HTML;
     }
     if(isset($_POST['eng_name']))
     {
@@ -308,11 +419,17 @@ function updateMv($db)
     }
     if(isset($_POST['comment']))
     {
-        $sql.='comment="'.$_POST['comment'].'",';
+        $comment = replace_quote($_POST['comment']);
+        $sql.= <<< HTML
+        comment = "$comment",
+HTML;
     }
     $sql = rtrim($sql,',');
-    $sql.=' WHERE chn_name="'.$old_chn_name.'"';
-    
+    $sql.=' ';
+    $sql.= <<< HTML
+    WHERE chn_name = "$old_chn_name"
+HTML;
+    //echo 'sql:'.$sql;
     $ret = $db->exec($sql);
     $res['status'] = 'ok';
     if(!$ret){
@@ -323,7 +440,7 @@ function updateMv($db)
 
 function deleteMv($db)
 {
-    $sql = 'DELETE FROM libmov WHERE chn_name="'.$_POST['chn_name'].'"';
+    $sql = 'DELETE FROM libmov WHERE chn_name="'.replace_quote($_POST['chn_name']).'"';
     $ret = $db->exec($sql);
     $res=['status'=>'ok'];
     if(!$ret){
