@@ -1,19 +1,49 @@
 <?php include_once('header.php');?>
    <div class="row">
-        <div class="center-block">
-
-
-    <table class="table table-striped table-condensed">
+      <div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">观影记录</h3>
+    </div>
+    <div class="panel-body">
+    <table id="data" class="table table-striped table-condensed">
     <thead>
        <tr>
            <th>中文名</th>
            <th>英文名</th>
+           <th>评分</th>
            <th>上映日</th>
            <th>完成日</th>
        </tr>
        </thead>
-       <tbody>
-<?php
+            <tbody>
+       </tbody>
+    </table>
+   </div>
+  </div>
+ </div>
+<div class="row">
+    <div class="span12">
+        <p>本页<span id="itemnum" class="badge badge-inverse"></span>条&nbsp;
+        总共<span id="totalnum" class="badge badge-inverse"></span>条</p>
+    </div>
+    <div class="col-sm-6">
+        <div id="commentdiv" class="form-horizontal">
+            <label for="delete_topic">影评</label>
+            <textarea id="comment" class="form-control" rows="5"></textarea>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="form-inline">
+             <label for="delete_topic">中文名</label>
+            <input type="text" id="delete_topic" name="delete_topic"/>
+            <button type="button" id="delete" class="btn btn-danger btn-sm"/>删除</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    
+</script>
+<!--?php
 // TODO 改成分页模式
 require_once('connect.php');
 
@@ -81,5 +111,5 @@ EOF;
 ?>
 </tbody></table>
 </div>
-</div>
+</div-->
 <?php include_once('footer.php');?>
