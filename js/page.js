@@ -30,9 +30,8 @@
                            table.append(row);
                        }
                        // 添加条数到统计信息
-                       debugger;
                        $('span#itemnum').text(nums);
-                       $('span#totalnum').text(total);
+                       $('span#totalnum').text(totalItems);
                    });
                });
                var li = $('<li></li>');

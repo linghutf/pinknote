@@ -25,16 +25,15 @@
         总共<span id="totalnum" class="badge badge-inverse"></span>条</p>
     </div>
         <!-- 删除错误记录接口 -->
-        <div class="panel panel-danger">
-        <!--div class="panel-heading">
-        <h3 class="panel-title">历史记录</h3>
-         </div-->
-        <div class="form-inline">
-            <label for="delete_topic">主题</label>
-            <input type="text" id="delete_topic" name="delete_topic"/>
+       <div class="col-sm-6 pnael panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title">删除主题</h3>
+        </div>
+        <div class="panel-body">
+            <input type="text" id="delete_topic" name="delete_topic" placeholder="请输入影片主题"/>
             <button type="button" id="delete" class="btn btn-danger btn-sm"/>删除</button>
         </div>
-  </div>
+       </div>
 </div>
 <script type="text/javascript">
     $(document).ready(function(){

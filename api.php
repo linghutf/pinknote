@@ -12,19 +12,21 @@ switch($type)
     case "getMvPageNum":echo getPageNum($db,'libmov');break;
     // 任务中心功能
     case "addAv":echo addAv($db);break;
-    case "listAvTodo":echo listAvTodo($db);break;
+    case "listAvTodo":echo listAv($db,$isTodo=true);break;
     case "finishAvTodo":echo finishAvTodo($db);break;
     // 未完成，已完成的共用更新方法
     case "updateAv":echo updateAv($db);break;
-    case "listAvDetail":echo listAvDetail($db);break;
+    case "listAvHistory":echo listAv($db,$isTodo=false);break;
+    case "deleteAv":echo deleteAv($db);break;
+    //case "listAvDetail":echo listAvDetail($db);break;
     
     case "addMv":echo addMv($db);break;
-    case "listMvTodo":echo listMvTodo($db);break;
+    case "listMvTodo":echo listMv($db,$isTodo=true);break;
+    case "deleteMv":echo deleteMv($db);break;
     case "finishMvTodo":echo finishMvTodo($db);break;
     case "updateMv":echo updateMv($db);break;
+    case "listMvHistory":echo listMv($db,$isTodo=false);break;
     
-    case "listAvHistory":echo listAvHistory($db);break;
-    case "deleteAv":echo deleteAv($db);break;
     // 展示影片详情,更新影评
     case "listMvDetail":echo listMvDetail($db);break;
 }
@@ -118,15 +120,20 @@ function updateAv($db)
     return json_encode($res);
 }
 
-// 显示AvTODO列表
-function listAvTodo($db)
+// 显示列表
+function listAv($db,$isTodo)
 {
     $offset = $_POST['offset'];//起始页
     $num = $_POST['num'];//条数
-    
-    $sql='SELECT topic,actor,rank,pressDate FROM movie where finishDate=0 ORDER BY pressDate asc limit '
+    $sql = '';
+    if($isTodo){
+        $sql='SELECT topic,actor,rank,pressDate FROM movie where finishDate=0 ORDER BY pressDate asc limit '
     .$offset.','.$num;
-    
+    }
+    else{
+        $sql='SELECT topic,actor,rank,pressDate,finishDate FROM movie where finishDate!=0 ORDER BY finishDate desc limit '
+    .$offset.','.$num;
+    }
     $ret = $db->query($sql);
     $arr = ["status"=>"ok"];
     $arr['data'] = [];
@@ -134,6 +141,11 @@ function listAvTodo($db)
         $pressDate = $row["pressDate"];
         $pressDate = date('Y-m-d',$pressDate);
         $row['pressDate'] = $pressDate;
+        if(!$isTodo){
+            $finishDate = $row["finishDate"];
+            $finishDate = date('Y-m-d',$finishDate);
+            $row['finishDate'] = $finishDate;
+        }
         array_push($arr['data'],$row);
     }
     if(count($arr['data'])==0) $arr['status']='todos empty!';
@@ -153,29 +165,7 @@ function finishAvTodo($db)
     
 }
 
-function listAvHistory($db)
-{
-    $offset = $_POST['offset'];//起始页
-    $num = $_POST['num'];//条数
-    
-    $sql='SELECT topic,actor,rank,pressDate,finishDate FROM movie where finishDate!=0 ORDER BY finishDate desc limit '
-    .$offset.','.$num;
-    
-    $ret = $db->query($sql);
-    $arr = ["status"=>"ok"];
-    $arr['data'] = [];
-    while($row = $ret->fetchArray(SQLITE3_ASSOC)){
-        $pressDate = $row["pressDate"];
-        $pressDate = date('Y-m-d',$pressDate);
-        $row['pressDate'] = $pressDate;
-        $finishDate = $row["finishDate"];
-        $finishDate = date('Y-m-d',$finishDate);
-        $row['finishDate'] = $finishDate;
-        array_push($arr['data'],$row);
-    }
-    if(count($arr['data'])==0) $arr['status']='todos empty!';
-    return json_encode($arr);
-}
+
 
 function deleteAv($db)
 {
@@ -223,9 +213,9 @@ function listSerie()
 function addMv($db)
 {
     $pressDate = strtotime($_POST["pressDate"]);
-    
+    $finishDate = strtotime($_POST['finishDate']);
     $res = ['status'=>'ok'];
-    $sql = "insert into libmov(chn_name,eng_name,rank,pressDate) values(:chn_name,:eng_name,:rank,:pressDate)";
+    $sql = "insert into libmov(chn_name,eng_name,pressDate,finishDate,rank,comment) values(:chn_name,:eng_name,:rank,:pressDate,:finishDate,:rank,:comment)";
     
     $stmt = $db->prepare($sql);
     
@@ -233,6 +223,8 @@ function addMv($db)
     $stmt->bindValue(':eng_name',$_POST['eng_name'],SQLITE3_TEXT);
     $stmt->bindValue(":rank",$_POST['rank'],SQLITE3_INTEGER);
     $stmt->bindValue(':pressDate',$pressDate,SQLITE3_INTEGER);
+    $stmt->bindValue(':finishDate',$finishDate,SQLITE3_INTEGER);
+    $stmt->bindValue(':comment',$_POST['comment'],SQLITE3_TEXT);
     $ret=$stmt->execute();
     
     if(!$ret){
@@ -242,15 +234,19 @@ function addMv($db)
 }
 
 
-// 显示AvTODO列表
-function listMvTodo($db)
+// 显示Mv列表
+function listMv($db,$isTodo)
 {
     $offset = $_POST['offset'];//起始页
     $num = $_POST['num'];//条数
-    
-    $sql='SELECT chn_name,eng_name,rank,pressDate FROM libmov where finishDate==0 ORDER BY pressDate asc,rank desc limit '
+    $sql='';
+    if($isTodo){
+        $sql='SELECT chn_name,eng_name,rank,pressDate FROM libmov where finishDate==0 ORDER BY pressDate asc,rank desc limit '
     .$offset.','.$num;
-    
+    }else{
+        $sql='SELECT chn_name,eng_name,pressDate,finishDate,rank,comment FROM libmov where finishDate!=0 ORDER BY finishDate desc limit '
+    .$offset.','.$num;
+    }
     $ret = $db->query($sql);
     $arr = ["status"=>"ok"];
     $arr['data'] = [];
@@ -258,6 +254,11 @@ function listMvTodo($db)
         $pressDate = $row["pressDate"];
         $pressDate = date('Y-m-d',$pressDate);
         $row['pressDate'] = $pressDate;
+        if(!$isTodo){
+            $finishDate = $row["finishDate"];
+            $finishDate = date('Y-m-d',$finishDate);
+            $row['finishDate'] = $finishDate;
+        }
         array_push($arr['data'],$row);
     }
     if(count($arr['data'])==0) $arr['status']='todos empty!';
@@ -288,10 +289,6 @@ function updateMv($db)
     {
         $sql.='eng_name="'.$_POST['eng_name'].'",';
     }
-    if(isset($_POST['rank']))
-    {
-        $sql.='rank='.$_POST['rank'].',';
-    }
     if(isset($_POST['pressDate']))
     {
         $sql.='pressDate='.dt_to_unix($_POST['pressDate']).',';
@@ -300,6 +297,14 @@ function updateMv($db)
     {
         $sql.=' finishDate='.dt_to_unix($_POST['finishDate']).',';
     }
+    if(isset($_POST['rank']))
+    {
+        $sql.='rank='.$_POST['rank'].',';
+    }
+    if(isset($_POST['comment']))
+    {
+        $sql.='comment="'.$_POST['comment'].'",';
+    }
     $sql = rtrim($sql,',');
     $sql.=' WHERE chn_name="'.$old_chn_name.'"';
     
@@ -307,6 +312,17 @@ function updateMv($db)
     $res['status'] = 'ok';
     if(!$ret){
         $res['status'] = $db->lastErrorMsg();
+    }
+    return json_encode($res);
+}
+
+function deleteMv($db)
+{
+    $sql = 'DELETE FROM libmov WHERE chn_name="'.$_POST['chn_name'].'"';
+    $ret = $db->exec($sql);
+    $res=['status'=>'ok'];
+    if(!$ret){
+        $res['status']=$db->lastErrorMsg();
     }
     return json_encode($res);
 }
