@@ -241,7 +241,7 @@
           $('a#save').each(function(){
              $(this).attr('active','false');
           });
-          var topic = $('input#delete_topic').val(); 
+          var topic = $.trim($('input#delete_topic').val()); 
           $.post('api.php?action=deleteAv',{topic:topic},function(res) {
               if(res['status']!=='ok'){
                    //显示错误
@@ -249,7 +249,7 @@
                    return;
                }
                // 如果在当前记录中，去掉当前行
-               $('table tr:gt(0)').each(function(){
+               $('table tr:gr(0)').each(function(){
                    var name = $($(this).find('td:eq(0)')).text();
                   
                    if(name === topic){
