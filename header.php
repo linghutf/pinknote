@@ -28,7 +28,7 @@
                     <!--li><a href="add_mov.php">添加</a></li-->
                     <li><a href="mvtodo.php">TODO</a></li>
                     <li class="divider"></li>
-                    <li><a href="search_mov.php">查询</a></li>
+                    <li><a href="mvfind.php">查询</a></li>
                     <li class="divider"></li>
                     <li><a href="mvhist.php">历史</a></li>
                 </ul>
@@ -42,7 +42,7 @@
                     <!--li><a href="add_movie.php">添加</a></li-->
                     <li><a href="avtodo.php">TODO</a></li>
                     <li class="divider"></li>
-                    <li><a href="search.php">检索</a></li>
+                    <li><a href="avfind.php">检索</a></li>
                     <li class="divider"></li>
                     <li><a href="avhist.php">历史</a></li>
                     <li class="divider"></li>
@@ -57,8 +57,8 @@
                     文件共享<b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="up_file.php">上传</a></li>
-                    <li><a href="download_file.php">下载</a></li>
+                    <li><a href="fileup.php">上传</a></li>
+                    <li><a href="filedown.php">下载</a></li>
                     <!--li class="divider"></li>
                     <li><a href="list_file.php">浏览</a></li-->
 

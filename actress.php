@@ -11,7 +11,7 @@
             <tbody>
 
 <?php
-require_once("connect.php");
+require_once("database.php");
 require_once("utils.php");
 
 // 主题库

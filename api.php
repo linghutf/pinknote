@@ -1,7 +1,7 @@
 <?php
 header('Content-type: text/json;charset=utf-8');
 
-require_once('connect.php');
+require_once('database.php');
 require_once('utils.php');
 
 // 业务逻辑
@@ -18,6 +18,7 @@ switch($type)
     case "updateAv":echo updateAv($db);break;
     case "listAvHistory":echo listAv($db,$isTodo=false);break;
     case "deleteAv":echo deleteAv($db);break;
+    case "findAv":echo findAv($db);break;
     //case "listAvDetail":echo listAvDetail($db);break;
     
     case "addMv":echo addMv($db);break;
@@ -26,6 +27,7 @@ switch($type)
     case "finishMvTodo":echo finishMvTodo($db);break;
     case "updateMv":echo updateMv($db);break;
     case "listMvHistory":echo listMv($db,$isTodo=false);break;
+    case "findMv":echo findAv($db);break;
     
     // 展示影片详情,更新影评
     //case "listMvDetail":echo listMvDetail($db);break;
@@ -162,6 +164,48 @@ function listAv($db,$isTodo)
     }
     if(count($arr['data'])==0) $arr['status']='todos empty!';
     return json_encode($arr);
+}
+
+function findAv($db)
+{
+    $res=['status'=>'ok'];
+    $sql='SELECT topic,actor,pressDate,finishDate,rank from movie where 1==1';
+
+    $topic = isset($_POST['topic'])?$_POST['topic']:'';
+    $actor = isset($_POST['actor'])?$_POST['actor']:'';
+    $pressDate_start = isset($_POST['pressDate_start'])?dt_to_unix($_POST['pressDate_start']):'';
+    $pressDate_end = isset($_POST['pressDate_end'])?dt_to_unix($_POST['pressDate_end']):'';
+    $finishDate_start = isset($_POST['finishDate_start'])?dt_to_unix($_POST['finishDate_start']):'';
+    $finishDate_end = isset($_POST['finishDate_end'])?dt_to_unix($_POST['finishDate_end']):'';
+
+    if(!empty($topic))
+    {
+        $sql.=' AND topic like "%'.$topic.'%" COLLATE NOCASE';
+    }
+    if(!empty($actor))
+    {
+        $sql.=' AND actor like "%'.$actor.'%" COLLATE NOCASE';
+    }
+    if($pressDate_start!=0)
+    {
+        $sql.=' AND pressDate > '.$pressDate_start.' AND pressDate <='.$pressDate_end;
+    }
+    if($finishDate_start!=0)
+    {
+        $sql.=' AND finishDate > '.$finishDate_start.' AND finishDate <='.$finishDate_end;
+    }
+    $sql.=' order by pressDate desc;';
+
+    $ret = $db->query($sql);
+    $res['data']=[];
+    while($row=$ret->fetchArray(SQLITE3_ASSOC))
+    {
+        $row['pressDate'] = unix_to_dt($row['pressDate']);
+        $row['finishDate'] = unix_to_dt($row['finishDate']);
+        array_push($res['data'],$row);
+    }
+    if(count($res['data'])==0) $res['status']='empty result.';
+    return json_encode($res);
 }
 
 function finishAvTodo($db)
@@ -388,6 +432,47 @@ function finishMvTodo($db)
     return json_encode($res);
 }
 
+function findMv($db)
+{
+    $res=['status'=>'ok'];
+    $sql='SELECT chn_name,eng_name,pressDate,finishDate,rank from libmov where 1==1';
+
+    $topic = isset($_POST['chn_name'])?$_POST['chn_name']:'';
+    $actor = isset($_POST['eng_name'])?$_POST['eng_name']:'';
+    $pressDate_start = isset($_POST['pressDate_start'])?dt_to_unix($_POST['pressDate_start']):'';
+    $pressDate_end = isset($_POST['pressDate_end'])?dt_to_unix($_POST['pressDate_end']):'';
+    $finishDate_start = isset($_POST['finishDate_start'])?dt_to_unix($_POST['finishDate_start']):'';
+    $finishDate_end = isset($_POST['finishDate_end'])?dt_to_unix($_POST['finishDate_end']):'';
+
+    if(!empty($topic))
+    {
+        $sql.=' AND topic like "%'.$topic.'%" COLLATE NOCASE';
+    }
+    if(!empty($actor))
+    {
+        $sql.=' AND actor like "%'.$actor.'%" COLLATE NOCASE';
+    }
+    if($pressDate_start!=0)
+    {
+        $sql.=' AND pressDate > '.$pressDate_start.' AND pressDate <='.$pressDate_end;
+    }
+    if($finishDate_start!=0)
+    {
+        $sql.=' AND finishDate > '.$finishDate_start.' AND finishDate <='.$finishDate_end;
+    }
+    $sql.=' order by pressDate desc;';
+
+    $ret = $db->query($sql);
+    $res['data']=[];
+    while($row=$ret->fetchArray(SQLITE3_ASSOC))
+    {
+        $row['pressDate'] = unix_to_dt($row['pressDate']);
+        $row['finishDate'] = unix_to_dt($row['finishDate']);
+        array_push($res['data'],$row);
+    }
+    if(count($res['data'])==0) $res['status']='empty result.';
+    return json_encode($res);
+}
 function updateMv($db)
 {
     $old_chn_name = replace_quote($_POST['old_chn_name']);
