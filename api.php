@@ -10,6 +10,7 @@ switch($type)
 {
     case "getAvPageNum":echo getPageNum($db,'movie');break;
     case "getMvPageNum":echo getPageNum($db,'libmov');break;
+    case "getTodoPageNum":echo getPageNum($db,'todos');break;
     // 任务中心功能
     case "addAv":echo addAv($db);break;
     case "listAvTodo":echo listAv($db,$isTodo=true);break;
@@ -27,7 +28,7 @@ switch($type)
     case "finishMvTodo":echo finishMvTodo($db);break;
     case "updateMv":echo updateMv($db);break;
     case "listMvHistory":echo listMv($db,$isTodo=false);break;
-    case "findMv":echo findAv($db);break;
+    case "findMv":echo findMv($db);break;
     
     // 展示影片详情,更新影评
     //case "listMvDetail":echo listMvDetail($db);break;
@@ -79,7 +80,8 @@ function getPageNum($db,$table)
 function addAv($db)
 {
     $pressDate = strtotime($_POST["pressDate"]);
-    $finishDate = strtotime($_POST["finishDate"]);
+
+    $finishDate = isset($_POST['finishDate'])?strtotime($_POST["finishDate"]):'';
     $res = ['status'=>'ok'];
     $sql = "insert into movie(topic,actor,rank,pressDate,finishDate) values(:topic,:actor,:rank,:pressDate,:finishDate)";
     
@@ -225,7 +227,13 @@ function finishAvTodo($db)
 
 function deleteAv($db)
 {
-    $sql = 'DELETE FROM movie WHERE topic="'.$_POST['topic'].'"';
+    $sql = 'DELETE FROM movie WHERE topic';
+    if($_POST['topic']==''){
+        $sql.=' is null';
+    }else{
+        $sql.='="'.$_POST['topic'].'"';
+    }
+
     $ret = $db->exec($sql);
     $res=['status'=>'ok'];
     if(!$ret){
@@ -368,9 +376,9 @@ function deleteAvSerie($db)
 function addMv($db)
 {
     $pressDate = strtotime($_POST["pressDate"]);
-    $finishDate = strtotime($_POST['finishDate']);
+    $finishDate = isset($_POST['finishDate'])?strtotime($_POST['finishDate']):'';
     $res = ['status'=>'ok'];
-    $sql = "insert into libmov(chn_name,eng_name,pressDate,finishDate,rank,comment) values(:chn_name,:eng_name,:rank,:pressDate,:finishDate,:rank,:comment)";
+    $sql = "insert into libmov(chn_name,eng_name,pressDate,finishDate,rank,comment) values(:chn_name,:eng_name,:pressDate,:finishDate,:rank,:comment)";
     
     $stmt = $db->prepare($sql);
     
@@ -437,20 +445,20 @@ function findMv($db)
     $res=['status'=>'ok'];
     $sql='SELECT chn_name,eng_name,pressDate,finishDate,rank from libmov where 1==1';
 
-    $topic = isset($_POST['chn_name'])?$_POST['chn_name']:'';
-    $actor = isset($_POST['eng_name'])?$_POST['eng_name']:'';
+    $chn_name = isset($_POST['chn_name'])?$_POST['chn_name']:'';
+    $eng_name = isset($_POST['eng_name'])?$_POST['eng_name']:'';
     $pressDate_start = isset($_POST['pressDate_start'])?dt_to_unix($_POST['pressDate_start']):'';
     $pressDate_end = isset($_POST['pressDate_end'])?dt_to_unix($_POST['pressDate_end']):'';
     $finishDate_start = isset($_POST['finishDate_start'])?dt_to_unix($_POST['finishDate_start']):'';
     $finishDate_end = isset($_POST['finishDate_end'])?dt_to_unix($_POST['finishDate_end']):'';
 
-    if(!empty($topic))
+    if(!empty($chn_name))
     {
-        $sql.=' AND topic like "%'.$topic.'%" COLLATE NOCASE';
+        $sql.=' AND chn_name like "%'.$chn_name.'%" COLLATE NOCASE';
     }
-    if(!empty($actor))
+    if(!empty($eng_name))
     {
-        $sql.=' AND actor like "%'.$actor.'%" COLLATE NOCASE';
+        $sql.=' AND eng_name like "%'.$eng_name.'%" COLLATE NOCASE';
     }
     if($pressDate_start!=0)
     {
@@ -473,6 +481,7 @@ function findMv($db)
     if(count($res['data'])==0) $res['status']='empty result.';
     return json_encode($res);
 }
+
 function updateMv($db)
 {
     $old_chn_name = replace_quote($_POST['old_chn_name']);
@@ -532,4 +541,28 @@ function deleteMv($db)
         $res['status']=$db->lastErrorMsg();
     }
     return json_encode($res);
+}
+
+/**
+ * 备忘记事相关
+ */
+function listTodo($db,$isTodo)
+{
+    $offset = $_POST['offset'];//起始页
+    $num = $_POST['num'];//条数
+    $sql = '';
+    if($isTodo){
+        $sql.='SELECT topic,create_at,plan_at FROM todos WHERE finish_at is null ORDER BY plan_at asc LIMIT';
+    }else{
+        $sql.='SELECT topic,finish_at,plan_at FROM todos WHERE finish_at is not null ORDER BY finish_at desc,plan_at desc LIMIT';
+    }
+    $sql.=' '.$offset.','.$num;
+    $ret = $db->query($sql);
+    $arr = ["status"=>"ok"];
+    $arr['data'] = [];
+    while($row = $ret->fetchArray(SQLITE3_ASSOC)){
+        array_push($arr['data'],$row);
+    }
+    if(count($arr['data'])==0) $arr['status']='todos empty!';
+    return json_encode($arr);
 }

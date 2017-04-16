@@ -1,4 +1,5 @@
-<?php $title="日本历史记录";include_once('header.php');?>
+<?php $title="日本历史记录";
+include_once('header.php');?>
 <script type="text/javascript" src="js/avhist.js"></script>
 
 <div class="row">

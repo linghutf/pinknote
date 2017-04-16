@@ -1,4 +1,5 @@
-<?php $title="影片检索";include_once('header.php');?>
+<?php $title="影片检索";
+include_once('header.php');?>
     <script type="text/javascript" src="js/avhist.js"></script>
  <div class="leaderboard">
 
@@ -79,7 +80,7 @@
                 alert('输入参数为空!');
                 return;
             }
-            if (pressDate_start < pressDate_end || finishDate_end < finishDate_start) {
+            if (pressDate_start > pressDate_end || finishDate_end < finishDate_start) {
                 alert("时间不对!");
                 return;
             }

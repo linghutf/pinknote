@@ -54,14 +54,24 @@
 
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    记事<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="todos.php">TODO</a></li>
+                    <li class="divider"></li>
+                    <li><a href="todohist.php">历史</a></li>
+
+                </ul>
+            </li>
+
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                     文件共享<b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="fileup.php">上传</a></li>
+                    <li class="divider"></li>
                     <li><a href="filedown.php">下载</a></li>
-                    <!--li class="divider"></li>
-                    <li><a href="list_file.php">浏览</a></li-->
-
                 </ul>
             </li>
         </ul>

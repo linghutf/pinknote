@@ -1,4 +1,5 @@
-<?php $title="观影历史记录";include_once('header.php');?>
+<?php $title="观影历史记录";
+include_once('header.php');?>
 <script type="text/javascript" src="js/mvhist.js"></script>
    <div class="row">
       <div class="panel panel-primary">
@@ -111,7 +112,7 @@
            //获取评论
            data['comment'] = $.trim($('textarea#create_comment').val());
            // 发送数据
-           $.post("api.php?action=addAv",data,function(res){
+           $.post("api.php?action=addMv",data,function(res){
                if(res['status']!=='ok'){
                    //显示错误
                    $('body').append($('<div class="alert alert-error"></div>').text(res['status']));
@@ -130,7 +131,7 @@
            var cpanel = $('<p id="comment" class="form-control"></p>');
            $(cpanel).text(cm);
            $('textarea#create_comment').replaceWith(cpanel);
-           $('h3#title').text('<strong>'+data['chn_name']+'</strong>的影评');
+           $('h3#title').html('<strong>'+data['chn_name']+'</strong>的影评');
        }
        
        // 删除记录
