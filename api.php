@@ -44,6 +44,11 @@ switch($type)
     case "updateAvSerie":echo updateAvSerie($db);break;
     case "finishAvSerieTodo":echo finishAvSerieTodo($db);break;
     case "deleteAvSerie":echo deleteAvSerie($db);break;
+
+    case "listTodo":echo listTodo($db,$isTodo=true);break;
+    case "addTodo":echo addTodo($db);break;
+    case "updateTodo":echo updateTodo($db);break;
+    case "finishTodo":echo finishTodo($db);break;
 }
 // 结束
 $db->close();
@@ -56,12 +61,21 @@ function getPageNum($db,$table)
 {
     $itemNum = 16; // 每页展示条数
     $sql = 'SELECT COUNT(*) as ct FROM '.$table.' where finishDate';
-    // 默认是显示todo
-    if($_GET['isTodo']==1)//参数是字符串，需要转换
-    {
-        $sql.='==0';
-    }else{
-        $sql.='!=0';
+    if($table == 'todos'){
+        $sql = 'SELECT count(*) as ct FROM todos where finish_at is';
+        if($_GET['isTodo']==1){
+            $sql.=' null';
+        }else{
+            $sql.=' not null';
+        }
+    }else {
+        // 默认是显示todo
+        if ($_GET['isTodo'] == 1)//参数是字符串，需要转换
+        {
+            $sql .= '==0';
+        } else {
+            $sql .= '!=0';
+        }
     }
     $ret = $db->query($sql);
     $total = 0;
@@ -375,19 +389,24 @@ function deleteAvSerie($db)
  
 function addMv($db)
 {
-    $pressDate = strtotime($_POST["pressDate"]);
+    $pressDate = isset($_POST['pressDate'])?strtotime($_POST["pressDate"]):'';
     $finishDate = isset($_POST['finishDate'])?strtotime($_POST['finishDate']):'';
     $res = ['status'=>'ok'];
     $sql = "insert into libmov(chn_name,eng_name,pressDate,finishDate,rank,comment) values(:chn_name,:eng_name,:pressDate,:finishDate,:rank,:comment)";
     
     $stmt = $db->prepare($sql);
+
+    $chn_name = isset($_POST['chn_name'])?$_POST['chn_name']:'';
+    $eng_name = isset($_POST['eng_name'])?$_POST['eng_name']:'';
+    $rank = isset($_POST['rank'])?$_POST['rank']:'';
+    $comment = isset($_POST['comment'])?$_POST['comment']:'';
     
-    $stmt->bindValue(':chn_name',$_POST['chn_name'],SQLITE3_TEXT);
-    $stmt->bindValue(':eng_name',$_POST['eng_name'],SQLITE3_TEXT);
-    $stmt->bindValue(":rank",$_POST['rank'],SQLITE3_INTEGER);
+    $stmt->bindValue(':chn_name',$chn_name,SQLITE3_TEXT);
+    $stmt->bindValue(':eng_name',$eng_name,SQLITE3_TEXT);
+    $stmt->bindValue(":rank",$rank,SQLITE3_INTEGER);
     $stmt->bindValue(':pressDate',$pressDate,SQLITE3_INTEGER);
     $stmt->bindValue(':finishDate',$finishDate,SQLITE3_INTEGER);
-    $stmt->bindValue(':comment',$_POST['comment'],SQLITE3_TEXT);
+    $stmt->bindValue(':comment',$comment,SQLITE3_TEXT);
     $ret=$stmt->execute();
     
     if(!$ret){
@@ -552,9 +571,9 @@ function listTodo($db,$isTodo)
     $num = $_POST['num'];//条数
     $sql = '';
     if($isTodo){
-        $sql.='SELECT topic,create_at,plan_at FROM todos WHERE finish_at is null ORDER BY plan_at asc LIMIT';
+        $sql.='SELECT tid,topic,create_at,plan_at FROM todos WHERE finish_at is null ORDER BY plan_at asc LIMIT';
     }else{
-        $sql.='SELECT topic,finish_at,plan_at FROM todos WHERE finish_at is not null ORDER BY finish_at desc,plan_at desc LIMIT';
+        $sql.='SELECT tid,topic,finish_at,plan_at FROM todos WHERE finish_at is not null ORDER BY finish_at desc,plan_at desc LIMIT';
     }
     $sql.=' '.$offset.','.$num;
     $ret = $db->query($sql);
@@ -565,4 +584,75 @@ function listTodo($db,$isTodo)
     }
     if(count($arr['data'])==0) $arr['status']='todos empty!';
     return json_encode($arr);
+}
+
+function finishTodo($db)
+{
+    $tid = $_POST['tid'];
+    $dt = new DateTime('now');
+
+    $sql = 'UPDATE todos SET finish_at="'.$dt->format('Y-m-d H;i').'" WHERE tid='.$tid;
+    $ret = $db->exec($sql);
+    $res=['status'=>'ok'];
+    if(!$ret){
+        $res['status']=$db->lastErrorMsg();
+    }
+    return json_encode($res);
+}
+
+function addTodo($db)
+{
+
+    // 拿到上次的tid
+    $sql = 'SELECT MAX(tid) as mtid FROM todos';
+    $ret = $db->query($sql);
+    $res=[];
+    $res['status'] = 'ok';
+    $tid = 0;
+    if($row=$ret->fetchArray(SQLITE3_ASSOC))
+    {
+        $tid = $row['mtid'] +1;
+
+    }
+    $now = new DateTime('now');
+    $sql = 'INSERT INTO todos(tid,topic,create_at,plan_at) VALUES(:tid,:topic,:create_at,:plan_at)';
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':tid',$tid,SQLITE3_INTEGER);
+    $stmt->bindValue(':topic',$_POST['topic'],SQLITE3_TEXT);
+    $stmt->bindValue(':create_at',$now->format('Y-m-d H;i'),SQLITE3_TEXT);
+    $stmt->bindValue(':plan_at',$_POST['plan_at'],SQLITE3_TEXT);
+    $ret = $stmt->execute();
+    if(!$ret){
+        $res['status']=$db->lastErrorMsg();
+    }
+    $res['tid']=$tid;
+    $res['create_at'] = $now->format('Y-m-d H;i');
+    return json_encode($res);
+}
+
+function updateTodo($db)
+{
+    $tid = $_POST['old_tid'];
+    $sql='UPDATE todos SET';
+
+    if(isset($_POST['topic'])){
+        $sql.=' topic="'.$_POST['topic'].'",';
+    }
+    if(isset($_POST['create_at'])){
+        $sql.=' create_at="'.$_POST['create_at'].'",';
+    }
+    if(isset($_POST['plan_at'])){
+        $sql.=' plan_at="'.$_POST['plan_at'].'",';
+    }
+    if(isset($_POST['finish_at'])){
+        $sql.=' finish_at="'.$_POST['finish_at'].'",';
+    }
+    $sql = rtrim($sql,',');
+    $sql.=' WHERE tid='.$tid;
+    $ret = $db->exec($sql);
+    $res['status'] = 'ok';
+    if(!$ret){
+        $res['status'] = $db->lastErrorMsg();
+    }
+    return json_encode($res);
 }

@@ -1,5 +1,6 @@
 <?php $title="备忘列表";include_once('header.php');?>
 <script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="js/page.js"></script>
 <link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 
 <div class="row">
@@ -11,7 +12,9 @@
             <table id="data" class="table table-striped table-condensed">
                 <thead>
                 <tr>
+                    <th>编号</th>
                     <th>主题</th>
+                    <th>创建时间</th>
                     <th>预计时间</th>
                     <th><a href="#" id="add" class="btn btn-success">添加</a></th>
                 </tr>
@@ -32,8 +35,6 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-
-
         var g_tab = $("table#data");
         $.get('api.php?action=getTodoPageNum',{isTodo:1},function(res){
             if(res['status']!=='ok'){
@@ -53,6 +54,7 @@
         function createRowDOM(rowData)
         {
             var tr = $("<tr><</tr>");
+            tr.append($('<td class="col-sm-1"></td>').text(rowData["tid"]));
             tr.append($('<td class="col-sm-3"></td>').text(rowData["topic"]));
             tr.append($('<td class="col-sm-3"></td>').text(rowData["create_at"]));
             tr.append($('<td class="col-sm-3"></td>').text(rowData["plan_at"]));
@@ -81,14 +83,17 @@
             // 创建新行
             var newRow = $('<tr></tr>');
 
+            newRow.append($('<td></td>').append($('<input type="hidden" id="old_tid"/>').val(rowData['tid'])));
             newRow.append($('<td></td>').append($('<input type="text" id="topic" name="topic" required="true"/>').val(topic)));
-            newRow.append($('<td></td>').append($('<input type="text" id="create_at" data-date-format="yyyy-mm-dd hh:ii" />').val(create_at)));
+            //newRow.append($('<td></td>').append($('<input type="text" id="create_at" data-date-format="yyyy-mm-dd hh:ii" />').val(create_at)));
+            newRow.append($('<td></td>'));
             newRow.append($('<td></td>').append($('<input type="text" id="plan_at" data-date-format="yyyy-mm-dd hh:ii" required="true" />').val(plan_at)));
+
             // 事件处理待绑定
             newRow.append($('<td><a href="#" id="save" class="btn-success btn-xs">保存</a><a href="#" id="cancel" class="btn-info btn-xs">取消</a></td>'));
-            $('#create_at').datetimepicker();
-            $('#finish_at').datetimepicker();
-            $('#plan_at').datetimepicker();
+            //$('#create_at').datetimepicker();
+            //$('#finish_at').datetimepicker();
+
             return newRow;
         }
         // 公共函数
@@ -96,19 +101,18 @@
         function getEditRowData(curRow)
         {
             var topic = $.trim($(curRow.find("input#topic")).val());
-            var create_at = $(curRow.find("input#create_at")).val();
+            //var create_at = $(curRow.find("input#create_at")).val();
             var plan_at = $(curRow.find("input#plan_at")).val();
             var data = {};
             data['topic']=topic;
-            data['create_at']=create_at;
-            data['rank']=rank;
+            //data['create_at']=create_at;
             data['plan_at']=plan_at;
             return data;
         }
 
         function isNotModify(data)
         {
-            return data['topic'] === undefined && data['create_at'] === undefined && data['rank'] === undefined
+            return data['topic'] === undefined && data['create_at'] === undefined
                 && data['plan_at'] === undefined;
         }
 
@@ -118,16 +122,18 @@
 
             // 获取当前行的信息
             var curRow = $(this).parent().parent();
-            var topic = $(curRow.find('td:eq(0)')).text();
-            var create_at = $(curRow.find('td:eq(1)')).text();
-            var plan_at = $(curRow.find('td:eq(2)')).text();
-            var oldData = {topic:topic,create_at:create_at,plan_at:plan_at};
+            var tid = $(curRow.find('td:eq(0)')).text();
+            var topic = $(curRow.find('td:eq(1)')).text();
+            var create_at = $(curRow.find('td:eq(2)')).text();
+            var plan_at = $(curRow.find('td:eq(3)')).text();
+            var oldData = {tid:tid,topic:topic,create_at:create_at,plan_at:plan_at};
 
             var newRow = createNewEditRow(oldData);
             // 保存旧消息
-            newRow.append($('<td></td>').append($('<input type="hidden" id="old_topic"/>').val(topic)));
+            newRow.append($('<td></td>').append($('<input type="hidden" id="old_tid"/>').val(tid)));
 
-
+            // 没效果
+            $('input#plan_at').datetimepicker();
             // 更新事件绑定
             // 更新操作，相比保存操作多了一步检查
             // 与旧数据相同则不发送
@@ -136,8 +142,8 @@
                 var curEditRow = $(this).parent().parent();
                 var data = getEditRowData(curEditRow);
                 //得到原始旧消息
-                var old_topic = $.trim($(curEditRow.find("input#old_topic")).val());
-                data['old_topic']=old_topic;
+                var old_tid = $.trim($(curEditRow.find("input#old_tid")).val());
+                data['old_tid']=old_tid;
                 var cloneData = clone(data);
 
                 // 相同的去除
@@ -149,7 +155,7 @@
                 }
                 if(!isNotModify(data)){
                     // 发送数据
-                    $.post("api.php?action=updateAv",data,function(res){
+                    $.post("api.php?action=updateTodo",data,function(res){
                         if(res['status']!=='ok'){
                             //显示错误
                             $('body').append($('<div class="alert alert-error"></div>').text(res['status']));
@@ -185,9 +191,9 @@
         function finishHandler()
         {
             var curRow = $(this).parent().parent();
-            var topic = $(curRow.find("td:eq(0)")).text();
+            var tid = $(curRow.find("td:eq(0)")).text();
 
-            $.post("api.php?action=finishAvTodo",{topic:topic},function(res){
+            $.post("api.php?action=finishTodo",{tid:tid},function(res){
                 if(res['status']!=='ok'){
                     //显示错误
                     $('body').append($('<div class="alert alert-error"></div>').text(res['status']));
@@ -199,11 +205,14 @@
         }
 
         // 点击添加按钮
+        // 返回tid
         $("a#add").click(function(){
             //$(this).attr("disables",true);//不可再点击
             //$("div#add_row").show();
             // 创建新行
             var newRow = createNewEditRow({});
+            // 没效果
+            $('input#plan_at').datetimepicker();
             // 添加到table
             g_tab.prepend(newRow);
             // 保存按钮重新绑定事件
@@ -219,12 +228,15 @@
             var curRow = $(this).parent().parent();
             var data = getEditRowData(curRow);
             // 发送数据
-            $.post("api.php?action=addAv",data,function(res){
+            $.post("api.php?action=addTodo",data,function(res){
                 if(res['status']!=='ok'){
                     //显示错误
                     $('body').append($('<div class="alert alert-error"></div>').text(res['status']));
                     return;
                 }
+                // 返回tid,创建时间
+                data['tid'] = res['tid'];
+                data['create_at'] = res['create_at'];
                 // 添加到table
                 g_tab.prepend(createRowDOM(data));
                 // 移除当前编辑行

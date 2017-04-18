@@ -1,55 +1,70 @@
-<?php include_once('header.php');?>
-   <form class="form-inline" role="form" action="<?php print $_SERVER['PHP_SELF']?>" method="post">
-  <div class="form-group">
-    <label for="filename" class="col-sm-2 control-label">文件名</label>
-    <div class="col-sm-10">
-      <input type="file" class="form-control" id="filename" name="upload_file" enctype="multipart/form-data" />
-    </div>
-  </div>
+<?php $title = "上传文件";
+include_once('header.php'); ?>
+<div class="row">
+    <form enctype="multipart/form-data">
+        <div class="form-group">
+            <!--label for="filename" class="col-sm-2 control-label">文件名</label-->
+            <div class="col-sm-10">
+                <input type="file" class="form-control" id="filename" name="upload_file" enctype="multipart/form-data"/>
+                <progress></progress>
+            </div>
+        </div>
 
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <input type="submit" class="btn form-control" name="upload" value="上传" />
-    </div>
-  </div>
-</form>
+        <div class="form-group">
+            <div class="col-sm-2">
+                <button class="btn form-control btn-primary" id="upload">上传</button>
+            </div>
+        </div>
 
-<?php
-if(isset($_POST['upload']))
-{
-    if(isset($_FILES['upload_file']))
-    {
-        if($_FILES['upload_file']['error']>0)
-        {
-            switch ($error){
-            case 1:
-                echo '<div class="row"><p>超过了上传文件的最大值，请上传2M以下文件<p></div>';
-                break;
-            case 2:
-                echo '<div class="row"><p>上传文件过多，请一次上传20个及以下文件！<p></div>';
-                break;
-            case 3:
-                echo '<div class="row"><p>文件并未完全上传，请再次尝试！<p></div>';
-                break;
-            case 4:
-                echo '<div class="row"><p>未选择上传文件！<p></div>';
-                break;
-            case 5:
-                echo '<div class="row"><p>上传文件大小为0!<p></div>';
-                break;
-            }
-        }else{
-            $filename = $_FILES['upload_file']['name'];
-            $type = $_FILES['upload_file']['type'];
-            $tmp_name=$_FILES['upload_file']['tmp_name'];
-            $size=$_FILES['upload_file']['size'];
-            if(!move_uploaded_file($tmp_name, "uploads/".$filename))
-            {
-                echo 'error';
+    </form>
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(':file').change(function(){
+            var file = this.files[0];
+            name = file.name;
+            size = file.size;
+            type = file.type;
+            //your validation
+        });
+        $('button#upload').click(function () {
+            var formData = new FormData($('form')[0]);
+            $.ajax({
+                url: 'upload.php',  //server script to process data
+                type: 'POST',
+                xhr: function () {  // custom xhr
+                    myXhr = $.ajaxSettings.xhr();
+                    if (myXhr.upload) { // check if upload property exists
+                        myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // for handling the progress of the upload
+                    }
+                    return myXhr;
+                },
+                //Ajax事件
+                beforeSend: beforeSendHandler,
+                success: completeHandler,
+                error: errorHandler,
+                // Form数据
+                data: formData,
+                //Options to tell JQuery not to process data or worry about content-type
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+        function progressHandlingFunction(e){
+            if(e.lengthComputable){
+                $('progress').attr({value:e.loaded,max:e.total});
             }
         }
-    }
-}
-?>
 
-<?php include_once('footer.php');?>
+        function beforeSendHandler(){}
+        function completeHandler(){
+            $('body').append($('<div></div>').text('上传成功'));
+        }
+        function errorHandler(){
+            alert('上传失败!');
+        }
+    });
+</script>
+<?php include_once('footer.php'); ?>

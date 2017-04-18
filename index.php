@@ -2,7 +2,7 @@
 // A simple web site in Cloud9 that runs through Apache
 // Press the 'Run' button on the top to start the web server,
 // then click the URL that is emitted to the Output tab of the console
-
+$title="我的时光记录网站";
 include_once('header.php');
 
 //setcookie('firstday',strtotime(date('Y-m-01')),time()+31536000,'/');
