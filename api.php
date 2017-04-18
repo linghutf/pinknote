@@ -49,10 +49,28 @@ switch($type)
     case "addTodo":echo addTodo($db);break;
     case "updateTodo":echo updateTodo($db);break;
     case "finishTodo":echo finishTodo($db);break;
+
+    case "filelist":echo listFiles($path="files");break;
 }
 // 结束
 $db->close();
 
+function listFiles($path)
+{
+    $list = dir_list($path.DIRECTORY_SEPARATOR);
+
+    $res=['status'=>'ok'];
+    $res['data']=[];
+    foreach($list as $v){
+        $item=[];
+        $item['name'] = basename($v);
+        $item['size'] = filesize($v);
+        $item['url'] = $v;
+        array_push($res['data'],$item);
+    }
+    if(empty($res['data'])) $res['status']='file empty';
+    return json_encode($res);
+}
 /**
  *  电影类操作
  */
