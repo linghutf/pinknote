@@ -7,8 +7,9 @@
         <div class="panel-body">
             <table id="data" class="table table-striped table-condensed">
                 <thead><tr>
-                    <td>文件名</td>
-                    <td>大小</td>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>操作</th>
                 </tr></thead>
                 <tbody></tbody>
             </table>
@@ -41,7 +42,45 @@
             tr.append($('<td></td>').append(a));
             var size = parseInt(rowData['size'])>>10;
             tr.append($('<td></td>').text(size+'KB'));
+            var td = $('<td></td>');
+            var downBtn = $('<a href="#" id="download" class="btn btn-xs">下载</a>');
+            // 绑定标记完成
+            downBtn.click(downHandler);
+            var deleteBtn = $('<a href="#" id="delete" class="btn-primary btn-xs">删除</a>');
+            deleteBtn.click(deleteHandler);
+            td.append(downBtn);
+            td.append(deleteBtn);
+            tr.append(td);
+
             return tr;
+        }
+
+        function downHandler(){
+            var curRow = $(this).parent().parent();
+            var url = $(curRow.find('a')).attr('href');
+            $.get('download.php',{url:url},function (res) {
+                if (res['status'] !== 'ok') {
+                    //显示错误
+                    $('body').append($('<div class="alert alert-error"></div>').text(res['status']));
+                    // 回退状态
+                    return;
+                }
+            });
+        }
+
+        function deleteHandler(){
+            var curRow = $(this).parent().parent();
+            var url = $(curRow.find('a')).attr('href');
+
+            $.get("api.php?action=delFile",{url:url},function(res){
+                if(res['status']!=='ok'){
+                    //显示错误
+                    $('body').append($('<div class="alert alert-error"></div>').text(res['status']));
+                    return;
+                }
+                // 移除当前行
+                curRow.remove();
+            });
         }
     });
 </script>

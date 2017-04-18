@@ -51,10 +51,15 @@ switch($type)
     case "finishTodo":echo finishTodo($db);break;
 
     case "filelist":echo listFiles($path="files");break;
+    case "delFile":echo delFile();break;
 }
 // 结束
 $db->close();
 
+/**
+ * 文件操作类
+ *
+ */
 function listFiles($path)
 {
     $list = dir_list($path.DIRECTORY_SEPARATOR);
@@ -69,6 +74,20 @@ function listFiles($path)
         array_push($res['data'],$item);
     }
     if(empty($res['data'])) $res['status']='file empty';
+    return json_encode($res);
+}
+
+function delFile()
+{
+    $file = $_GET['url'];
+    $res=['status'=>'ok'];
+    if(file_exists($file)){
+        if(!unlink($file)){
+            $res['status'] = 'delete failed.';
+        }
+    }else{
+        $res['status'] = 'file not exist.';
+    }
     return json_encode($res);
 }
 /**
